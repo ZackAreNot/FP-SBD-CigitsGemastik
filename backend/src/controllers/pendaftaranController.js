@@ -28,18 +28,6 @@ const daftarSolo = async (req, res, next) => {
       });
     }
 
-    const [anggotaRows] = await db.query(
-      'SELECT id_anggota FROM anggota WHERE nrp = ?',
-      [String(nrp).trim()]
-    );
-
-    if (anggotaRows.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'NRP sudah terdaftar'
-      });
-    }
-
     const pendaftar = {
       id_divisi_minat: Number(id_divisi_minat),
       nama_anggota: String(nama_anggota).trim(),
@@ -70,6 +58,12 @@ const daftarSolo = async (req, res, next) => {
       }
     });
   } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        success: false,
+        message: 'NRP sudah terdaftar'
+      });
+    }
     next(error);
   }
 };
@@ -171,35 +165,39 @@ const daftarTim = async (req, res, next) => {
     const nidn = String(dosen.nidn).trim();
     const email = String(dosen.email).trim();
 
-    const [dosenRows] = await connection.query(
-      'SELECT id_dosen, nidn, email FROM dosen WHERE nidn = ? OR email = ? LIMIT 1',
-      [nidn, email]
-    );
-
     let idDosen;
-    if (dosenRows.length > 0) {
-      const dosenAda = dosenRows[0];
-      if (dosenAda.nidn !== nidn || dosenAda.email !== email) {
-        await connection.rollback();
-        return res.status(409).json({
-          success: false,
-          message: 'NIDN atau email dosen sudah dipakai oleh data dosen lain'
-        });
-      }
-      idDosen = dosenAda.id_dosen;
-    } else {
+    try {
       const [dosenResult] = await connection.query(
         'INSERT INTO dosen (nama_dosen, nidn, email) VALUES (?, ?, ?)',
         [namaDosen, nidn, email]
       );
       idDosen = dosenResult.insertId;
+    } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY') {
+        const [dosenRows] = await connection.query(
+          'SELECT id_dosen, nidn, email FROM dosen WHERE nidn = ? OR email = ? LIMIT 1',
+          [nidn, email]
+        );
+        const dosenAda = dosenRows[0];
+        if (dosenAda.nidn !== nidn || dosenAda.email !== email) {
+          await connection.rollback();
+          return res.status(409).json({
+            success: false,
+            message: 'NIDN atau email dosen sudah dipakai oleh data dosen lain'
+          });
+        }
+        idDosen = dosenAda.id_dosen;
+      } else {
+        throw err;
+      }
     }
 
+    const tglDaftar = new Date().toISOString().slice(0, 10);
     const [timResult] = await connection.query(
       `INSERT INTO tim
         (nama_tim, id_divisi, id_dosen, judul, tanggal_daftar, status_pendaftaran)
-       VALUES (?, ?, ?, ?, CURDATE(), 'MENUNGGU')`,
-      [String(nama_tim).trim(), Number(id_divisi), idDosen, String(judul).trim()]
+       VALUES (?, ?, ?, ?, ?, 'MENUNGGU')`,
+      [String(nama_tim).trim(), Number(id_divisi), idDosen, String(judul).trim(), tglDaftar]
     );
 
     const idTim = timResult.insertId;
@@ -207,28 +205,34 @@ const daftarTim = async (req, res, next) => {
 
     for (const item of anggota) {
       const nrpAnggota = String(item.nrp).trim();
-      const [anggotaRows] = await connection.query(
-        'SELECT id_anggota FROM anggota WHERE nrp = ? LIMIT 1',
-        [nrpAnggota]
-      );
+      const divMinat = Number(id_divisi);
+      const namaAnggota = String(item.nama_anggota).trim();
+      const noWa = String(item.no_whatsapp).trim();
+      const jur = String(item.jurusan).trim();
 
       let idAnggota;
-      if (anggotaRows.length > 0) {
-        idAnggota = anggotaRows[0].id_anggota;
-      } else {
+      try {
         const [anggotaResult] = await connection.query(
           `INSERT INTO anggota
             (id_divisi_minat, nama_anggota, no_whatsapp, jurusan, nrp)
            VALUES (?, ?, ?, ?, ?)`,
-          [
-            Number(id_divisi),
-            String(item.nama_anggota).trim(),
-            String(item.no_whatsapp).trim(),
-            String(item.jurusan).trim(),
-            nrpAnggota
-          ]
+          [divMinat, namaAnggota, noWa, jur, nrpAnggota]
         );
         idAnggota = anggotaResult.insertId;
+      } catch (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          await connection.query(
+            `UPDATE anggota SET id_divisi_minat = ?, nama_anggota = ?, no_whatsapp = ?, jurusan = ? WHERE nrp = ?`,
+            [divMinat, namaAnggota, noWa, jur, nrpAnggota]
+          );
+          const [rows] = await connection.query(
+            'SELECT id_anggota FROM anggota WHERE nrp = ? LIMIT 1',
+            [nrpAnggota]
+          );
+          idAnggota = rows[0].id_anggota;
+        } else {
+          throw err;
+        }
       }
 
       await connection.query(
@@ -238,10 +242,10 @@ const daftarTim = async (req, res, next) => {
 
       anggotaTersimpan.push({
         id_anggota: idAnggota,
-        nama_anggota: String(item.nama_anggota).trim(),
+        nama_anggota: namaAnggota,
         nrp: nrpAnggota,
-        jurusan: String(item.jurusan).trim(),
-        no_whatsapp: String(item.no_whatsapp).trim(),
+        jurusan: jur,
+        no_whatsapp: noWa,
         peran: item.peran
       });
     }
@@ -262,7 +266,7 @@ const daftarTim = async (req, res, next) => {
           email
         },
         judul: String(judul).trim(),
-        tanggal_daftar: new Date().toISOString().slice(0, 10),
+        tanggal_daftar: tglDaftar,
         status: 'MENUNGGU',
         anggota: anggotaTersimpan
       }
@@ -273,6 +277,12 @@ const daftarTim = async (req, res, next) => {
     }
 
     if (error.code === 'ER_DUP_ENTRY') {
+      if (error.message.includes('uq_anggota_per_tim')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Satu atau lebih anggota sudah terdaftar di tim lain'
+        });
+      }
       return res.status(400).json({
         success: false,
         message: 'Data duplikat ditemukan. Periksa NRP anggota, NIDN dosen, atau email dosen'

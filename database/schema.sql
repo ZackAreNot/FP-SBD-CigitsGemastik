@@ -70,7 +70,7 @@ CREATE TABLE anggota_tim (
     REFERENCES anggota(id_anggota)
     ON UPDATE CASCADE
     ON DELETE RESTRICT,
-  CONSTRAINT uq_anggota_per_tim UNIQUE (id_tim, id_anggota)
+  CONSTRAINT uq_anggota_per_tim UNIQUE (id_anggota)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE INDEX idx_anggota_id_divisi_minat ON anggota(id_divisi_minat);

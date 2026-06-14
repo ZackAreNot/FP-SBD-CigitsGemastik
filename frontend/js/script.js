@@ -168,12 +168,12 @@ const renderTimTable = (tim) => {
 
   tbody.innerHTML = tim.map((item) => `
     <tr>
-      <td>${item.nama_tim}</td>
-      <td>${item.nama_divisi}</td>
-      <td>${item.nama_dosen}</td>
-      <td>${item.judul}</td>
+      <td>${escapeHtml(item.nama_tim)}</td>
+      <td>${escapeHtml(item.nama_divisi)}</td>
+      <td>${escapeHtml(item.nama_dosen)}</td>
+      <td>${escapeHtml(item.judul)}</td>
       <td>${item.jumlah_anggota}</td>
-      <td>${statusBadge(item.status)}</td>
+      <td>${statusBadge(escapeHtml(item.status))}</td>
       <td>
         <div class="action-group">
           <button class="btn small secondary" type="button" data-action="verifikasi" data-id="${item.id_tim}">Verifikasi</button>
@@ -425,12 +425,12 @@ const showDetailTim = async (id) => {
 
   content.innerHTML = `
     <div class="detail-list">
-      <div class="detail-item"><span>Nama Tim</span><strong>${detail.nama_tim}</strong></div>
-      <div class="detail-item"><span>Status</span><strong>${detail.status}</strong></div>
-      <div class="detail-item"><span>Divisi</span><strong>${detail.nama_divisi}</strong></div>
-      <div class="detail-item"><span>Dosen</span><strong>${detail.nama_dosen}</strong></div>
-      <div class="detail-item"><span>Judul</span><strong>${detail.judul}</strong></div>
-      <div class="detail-item"><span>Tanggal Daftar</span><strong>${detail.tanggal_daftar}</strong></div>
+      <div class="detail-item"><span>Nama Tim</span><strong>${escapeHtml(detail.nama_tim)}</strong></div>
+      <div class="detail-item"><span>Status</span><strong>${escapeHtml(detail.status)}</strong></div>
+      <div class="detail-item"><span>Divisi</span><strong>${escapeHtml(detail.nama_divisi)}</strong></div>
+      <div class="detail-item"><span>Dosen</span><strong>${escapeHtml(detail.nama_dosen)}</strong></div>
+      <div class="detail-item"><span>Judul</span><strong>${escapeHtml(detail.judul)}</strong></div>
+      <div class="detail-item"><span>Tanggal Daftar</span><strong>${escapeHtml(detail.tanggal_daftar)}</strong></div>
     </div>
     <div class="table-wrap">
       <table>
@@ -446,11 +446,11 @@ const showDetailTim = async (id) => {
         <tbody>
           ${detail.anggota.map((anggota) => `
             <tr>
-              <td>${anggota.peran}</td>
-              <td>${anggota.nama_anggota}</td>
-              <td>${anggota.nrp}</td>
-              <td>${anggota.jurusan}</td>
-              <td>${anggota.no_whatsapp}</td>
+              <td>${escapeHtml(anggota.peran)}</td>
+              <td>${escapeHtml(anggota.nama_anggota)}</td>
+              <td>${escapeHtml(anggota.nrp)}</td>
+              <td>${escapeHtml(anggota.jurusan)}</td>
+              <td>${escapeHtml(anggota.no_whatsapp)}</td>
             </tr>
           `).join('')}
         </tbody>
