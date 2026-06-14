@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - CiGITS GEMASTIK ITS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="admin">
+  <nav class="topbar page-topbar">
+    <a class="brand" href="index.html">CiGITS</a>
+    <div class="nav-links">
+      <a href="daftar-solo.html">Solo</a>
+      <a href="daftar-tim.html">Tim</a>
+      <a class="active" href="admin.html">Admin</a>
+    </div>
+  </nav>
+
+  <main class="container wide">
+    <header class="page-header">
+      <p class="eyebrow">Admin</p>
+      <h1>Dashboard Pendaftaran</h1>
+      <p>Pantau pendaftar solo dan verifikasi tim seleksi internal GEMASTIK.</p>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span>Total Peserta Solo</span>
+        <strong id="totalSolo">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Total Tim</span>
+        <strong id="totalTim">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Total Menunggu</span>
+        <strong id="totalMenunggu">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Total Terkonfirmasi</span>
+        <strong id="totalTerkonfirmasi">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Total Ditolak</span>
+        <strong id="totalDitolak">0</strong>
+      </article>
+    </section>
+
+    <section class="table-section">
+      <div class="section-title">
+        <h2>Peserta Solo</h2>
+        <button class="btn small secondary" id="exportSoloPdf" type="button">Export PDF</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>NRP</th>
+              <th>Jurusan</th>
+              <th>No WA</th>
+              <th>Divisi Minat</th>
+            </tr>
+          </thead>
+          <tbody id="soloTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <div class="section-title">
+        <h2>Tim</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama Tim</th>
+              <th>Divisi</th>
+              <th>Dosen</th>
+              <th>Judul</th>
+              <th>Jumlah Anggota</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="timTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="detail-panel hidden" id="detailPanel">
+      <div class="section-title">
+        <h2>Detail Tim</h2>
+        <button class="btn small ghost-dark" id="closeDetail" type="button">Tutup</button>
+      </div>
+      <div id="detailContent"></div>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

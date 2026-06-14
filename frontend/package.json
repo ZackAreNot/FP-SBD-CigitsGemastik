@@ -1,0 +1,13 @@
+{
+  "name": "cigits-app-frontend",
+  "version": "1.0.0",
+  "description": "Frontend vanilla CiGITS GEMASTIK ITS",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "devDependencies": {
+    "vite": "^8.0.16"
+  }
+}

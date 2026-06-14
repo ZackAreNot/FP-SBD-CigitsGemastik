@@ -1,0 +1,27 @@
+{
+  "name": "cigits-app-backend",
+  "version": "1.0.0",
+  "description": "Backend MySQL untuk Sistem Pendaftaran CiGITS GEMASTIK ITS",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [
+    "express",
+    "cigits",
+    "gemastik",
+    "mysql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "mysql2": "^3.22.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

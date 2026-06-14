@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Solo - CiGITS GEMASTIK ITS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="solo">
+  <nav class="topbar page-topbar">
+    <a class="brand" href="index.html">CiGITS</a>
+    <div class="nav-links">
+      <a class="active" href="daftar-solo.html">Solo</a>
+      <a href="daftar-tim.html">Tim</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="page-header">
+      <p class="eyebrow">Pendaftaran</p>
+      <h1>Daftar Solo</h1>
+      <p>Isi data peserta dan pilih divisi minat GEMASTIK.</p>
+    </header>
+
+    <section class="form-card">
+      <form id="soloForm">
+        <div class="form-grid">
+          <label>
+            Nama Lengkap
+            <input type="text" name="nama_anggota" placeholder="Nama lengkap" required>
+          </label>
+          <label>
+            NRP
+            <input type="text" name="nrp" placeholder="5025..." required>
+          </label>
+          <label>
+            Jurusan
+            <input type="text" name="jurusan" placeholder="Informatika" required>
+          </label>
+          <label>
+            No WhatsApp
+            <input type="text" name="no_whatsapp" placeholder="08..." required>
+          </label>
+          <label class="full">
+            Divisi Minat
+            <select name="id_divisi_minat" id="soloDivisi" required>
+              <option value="">Memuat divisi...</option>
+            </select>
+          </label>
+        </div>
+        <button class="btn primary form-submit" type="submit">Kirim Pendaftaran</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

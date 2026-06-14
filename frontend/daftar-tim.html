@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Tim - CiGITS GEMASTIK ITS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="tim">
+  <nav class="topbar page-topbar">
+    <a class="brand" href="index.html">CiGITS</a>
+    <div class="nav-links">
+      <a href="daftar-solo.html">Solo</a>
+      <a class="active" href="daftar-tim.html">Tim</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="page-header">
+      <p class="eyebrow">Pendaftaran</p>
+      <h1>Daftar Tim</h1>
+      <p>Daftarkan tim, pembimbing, dan anggota yang akan mengikuti seleksi internal.</p>
+    </header>
+
+    <section class="form-card">
+      <form id="timForm">
+        <h2>Data Tim</h2>
+        <div class="form-grid">
+          <label>
+            Nama Tim
+            <input type="text" name="nama_tim" placeholder="Nama tim" required>
+          </label>
+          <label>
+            Divisi
+            <select name="id_divisi" id="timDivisi" required>
+              <option value="">Memuat divisi...</option>
+            </select>
+          </label>
+          <label>
+            Judul Karya/Proyek
+            <input type="text" name="judul" placeholder="Judul karya atau proyek" required>
+          </label>
+        </div>
+
+        <div class="member-section">
+          <h2>Dosen Pembimbing</h2>
+          <div class="form-grid">
+            <label>
+              Nama Dosen
+              <input type="text" name="nama_dosen" placeholder="Nama dosen pembimbing" required>
+            </label>
+            <label>
+              NIDN
+              <input type="text" name="nidn" placeholder="NIDN dosen" required>
+            </label>
+            <label class="full">
+              Email Dosen
+              <input type="email" name="email_dosen" placeholder="nama.dosen@its.ac.id" required>
+            </label>
+          </div>
+        </div>
+
+        <div class="member-section">
+          <h2>Ketua Tim</h2>
+          <div class="form-grid member" data-role="KETUA">
+            <input type="text" data-field="nama_anggota" placeholder="Nama ketua" required>
+            <input type="text" data-field="nrp" placeholder="NRP ketua" required>
+            <input type="text" data-field="jurusan" placeholder="Jurusan ketua" required>
+            <input type="text" data-field="no_whatsapp" placeholder="No WhatsApp ketua" required>
+          </div>
+        </div>
+
+        <div class="member-section">
+          <h2>Anggota 1</h2>
+          <div class="form-grid member" data-role="ANGGOTA">
+            <input type="text" data-field="nama_anggota" placeholder="Nama anggota 1">
+            <input type="text" data-field="nrp" placeholder="NRP anggota 1">
+            <input type="text" data-field="jurusan" placeholder="Jurusan anggota 1">
+            <input type="text" data-field="no_whatsapp" placeholder="No WhatsApp anggota 1">
+          </div>
+        </div>
+
+        <div class="member-section">
+          <h2>Anggota 2</h2>
+          <div class="form-grid member" data-role="ANGGOTA">
+            <input type="text" data-field="nama_anggota" placeholder="Nama anggota 2">
+            <input type="text" data-field="nrp" placeholder="NRP anggota 2">
+            <input type="text" data-field="jurusan" placeholder="Jurusan anggota 2">
+            <input type="text" data-field="no_whatsapp" placeholder="No WhatsApp anggota 2">
+          </div>
+        </div>
+
+        <button class="btn primary form-submit" type="submit">Kirim Pendaftaran Tim</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
