@@ -162,12 +162,13 @@ const renderTimTable = (tim) => {
   const tbody = document.getElementById('timTableBody');
 
   if (tim.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-row">Belum ada pendaftar tim</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-row">Belum ada pendaftar tim</td></tr>';
     return;
   }
 
   tbody.innerHTML = tim.map((item) => `
     <tr>
+      <td><span class="badge primary">${escapeHtml(item.kode_registrasi)}</span></td>
       <td>${escapeHtml(item.nama_tim)}</td>
       <td>${escapeHtml(item.nama_divisi)}</td>
       <td>${escapeHtml(item.nama_dosen)}</td>
@@ -425,6 +426,7 @@ const showDetailTim = async (id) => {
 
   content.innerHTML = `
     <div class="detail-list">
+      <div class="detail-item"><span>Kode Reg.</span><strong>${escapeHtml(detail.kode_registrasi)}</strong></div>
       <div class="detail-item"><span>Nama Tim</span><strong>${escapeHtml(detail.nama_tim)}</strong></div>
       <div class="detail-item"><span>Status</span><strong>${escapeHtml(detail.status)}</strong></div>
       <div class="detail-item"><span>Divisi</span><strong>${escapeHtml(detail.nama_divisi)}</strong></div>
