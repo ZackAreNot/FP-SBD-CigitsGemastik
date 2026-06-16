@@ -4,11 +4,13 @@ const {
   getTim,
   getDetailTim,
   verifikasiTim,
-  tolakTim
+  tolakTim,
+  getDashboardStats
 } = require('../controllers/adminController');
 
 const router = express.Router();
 
+router.get('/stats', getDashboardStats);
 router.get('/solo', getSolo);
 router.get('/tim', getTim);
 router.get('/tim/:id', getDetailTim);

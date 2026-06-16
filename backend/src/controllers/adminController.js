@@ -33,6 +33,7 @@ const getTim = async (req, res, next) => {
     const [data] = await db.query(
       `SELECT
         t.id_tim,
+        fn_GenerateKodeRegistrasi(t.id_tim) AS kode_registrasi,
         t.nama_tim,
         t.id_divisi,
         d.nama_divisi,
@@ -43,23 +44,10 @@ const getTim = async (req, res, next) => {
         t.judul,
         DATE_FORMAT(t.tanggal_daftar, '%Y-%m-%d') AS tanggal_daftar,
         t.status_pendaftaran AS status,
-        COUNT(at.id_anggota_tim) AS jumlah_anggota
+        fn_GetJumlahAnggota(t.id_tim) AS jumlah_anggota
       FROM tim t
       JOIN divisi d ON d.id_divisi = t.id_divisi
       JOIN dosen ON dosen.id_dosen = t.id_dosen
-      LEFT JOIN anggota_tim at ON at.id_tim = t.id_tim
-      GROUP BY
-        t.id_tim,
-        t.nama_tim,
-        t.id_divisi,
-        d.nama_divisi,
-        dosen.id_dosen,
-        dosen.nama_dosen,
-        dosen.nidn,
-        dosen.email,
-        t.judul,
-        t.tanggal_daftar,
-        t.status_pendaftaran
       ORDER BY t.id_tim DESC`
     );
 
@@ -80,6 +68,7 @@ const getDetailTim = async (req, res, next) => {
     const [timRows] = await db.query(
       `SELECT
         t.id_tim,
+        fn_GenerateKodeRegistrasi(t.id_tim) AS kode_registrasi,
         t.nama_tim,
         t.id_divisi,
         d.nama_divisi,
@@ -171,14 +160,68 @@ const updateStatusTim = async (req, res, next, status) => {
   }
 };
 
-const verifikasiTim = (req, res, next) => updateStatusTim(req, res, next, 'TERKONFIRMASI');
+const verifikasiTim = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    // Call the stored procedure instead of just a simple UPDATE
+    await db.query('CALL sp_VerifikasiTim(?)', [Number(id)]);
+
+    const [rows] = await db.query(
+      `SELECT
+        t.id_tim,
+        t.nama_tim,
+        t.status_pendaftaran AS status
+      FROM tim t
+      WHERE t.id_tim = ?`,
+      [Number(id)]
+    );
+
+    res.json({
+      success: true,
+      message: `Status tim berhasil diubah menjadi TERKONFIRMASI`,
+      data: rows[0]
+    });
+  } catch (error) {
+    // Catch custom SIGNAL errors from stored procedure
+    if (error.sqlState === '45000') {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+    next(error);
+  }
+};
 
 const tolakTim = (req, res, next) => updateStatusTim(req, res, next, 'DITOLAK');
+
+const getDashboardStats = async (req, res, next) => {
+  try {
+    const [rows] = await db.query('CALL sp_GetDashboardStats()');
+    // SP returns result in the first element of the array
+    const stats = rows[0][0]; 
+
+    res.json({
+      success: true,
+      message: 'Dashboard stats berhasil diambil',
+      data: {
+        total_solo: stats.total_solo,
+        total_tim: stats.total_tim,
+        tim_menunggu: stats.tim_menunggu,
+        tim_terkonfirmasi: stats.tim_terkonfirmasi
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   getSolo,
   getTim,
   getDetailTim,
   verifikasiTim,
-  tolakTim
+  tolakTim,
+  getDashboardStats
 };
