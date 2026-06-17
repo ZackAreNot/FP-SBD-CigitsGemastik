@@ -43,6 +43,7 @@ CREATE TABLE tim (
   id_dosen INT NOT NULL,
   judul VARCHAR(255) NOT NULL,
   tanggal_daftar DATE NOT NULL,
+  komentar_penolakan TEXT NULL,
   status_pendaftaran ENUM('MENUNGGU', 'TERKONFIRMASI', 'DITOLAK') NOT NULL DEFAULT 'MENUNGGU',
   CONSTRAINT fk_tim_divisi
     FOREIGN KEY (id_divisi)

@@ -1135,7 +1135,7 @@ Penjelasan:
 - backend memanggil stored procedure untuk mengambil ringkasan statistik
 - hasil procedure dibaca dari `rows[0][0]`
 
-## 15. Query Penting yang Bisa Dijelaskan Saat Demo
+## 15. Query Penting
 
 ### Query master divisi
 

@@ -12,6 +12,8 @@
     <div class="nav-links">
       <a href="daftar-solo.html">Solo</a>
       <a href="daftar-tim.html">Tim</a>
+      <a href="tim-terverifikasi.html">Terverifikasi</a>
+      <a href="tim-ditolak.html">Ditolak</a>
       <a class="active" href="admin.html">Admin</a>
     </div>
   </nav>
@@ -98,6 +100,23 @@
       <div id="detailContent"></div>
     </section>
   </main>
+
+  <div class="modal-backdrop" id="rejectModal" hidden>
+    <div class="modal-card">
+      <div class="section-title modal-title">
+        <h2>Tolak Tim</h2>
+        <button class="btn small ghost-dark" id="closeRejectModal" type="button">Tutup</button>
+      </div>
+      <form id="rejectForm" class="modal-form">
+        <input type="hidden" id="rejectTimId" name="id_tim">
+        <label>
+          Komentar Penolakan
+          <textarea id="rejectComment" name="komentar_penolakan" rows="5" placeholder="Tuliskan alasan penolakan tim ini..." required></textarea>
+        </label>
+        <button class="btn danger form-submit" type="submit">Simpan Penolakan</button>
+      </form>
+    </div>
+  </div>
 
   <script src="js/script.js"></script>
 </body>

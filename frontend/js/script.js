@@ -1,5 +1,8 @@
 const API_BASE_URL = 'http://localhost:5000/api';
 let latestSoloData = [];
+let latestVerifiedTeams = [];
+let latestRejectedTeams = [];
+let latestDivisiData = [];
 
 const request = async (endpoint, options = {}) => {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -174,11 +177,20 @@ const renderTimTable = (tim) => {
       <td>${escapeHtml(item.nama_dosen)}</td>
       <td>${escapeHtml(item.judul)}</td>
       <td>${item.jumlah_anggota}</td>
-      <td>${statusBadge(escapeHtml(item.status))}</td>
+      <td>
+        <div class="status-cell">
+          ${statusBadge(escapeHtml(item.status))}
+          ${item.status === 'DITOLAK'
+            ? `<button class="btn small ghost-dark status-comment-btn" type="button" data-action="komentar" data-id="${item.id_tim}">${item.komentar_penolakan ? 'Lihat Komentar' : 'Isi Komentar'}</button>`
+            : ''}
+        </div>
+      </td>
       <td>
         <div class="action-group">
           <button class="btn small secondary" type="button" data-action="verifikasi" data-id="${item.id_tim}">Verifikasi</button>
-          <button class="btn small danger" type="button" data-action="tolak" data-id="${item.id_tim}">Tolak</button>
+          ${item.status !== 'DITOLAK'
+            ? `<button class="btn small danger" type="button" data-action="tolak" data-id="${item.id_tim}">Tolak</button>`
+            : ''}
           <button class="btn small ghost-dark" type="button" data-action="detail" data-id="${item.id_tim}">Detail</button>
         </div>
       </td>
@@ -192,6 +204,200 @@ const updateStats = (solo, tim) => {
   document.getElementById('totalMenunggu').textContent = tim.filter((item) => item.status === 'MENUNGGU').length;
   document.getElementById('totalTerkonfirmasi').textContent = tim.filter((item) => item.status === 'TERKONFIRMASI').length;
   document.getElementById('totalDitolak').textContent = tim.filter((item) => item.status === 'DITOLAK').length;
+};
+
+const renderVerifiedGroups = (divisiList, teams, selectedDivisiId = 'all') => {
+  const container = document.getElementById('verifiedGroups');
+
+  const filteredDivisi = selectedDivisiId === 'all'
+    ? divisiList
+    : divisiList.filter((item) => String(item.id_divisi) === String(selectedDivisiId));
+
+  container.innerHTML = filteredDivisi.map((divisi) => {
+    const teamsInDivisi = teams.filter((team) => Number(team.id_divisi) === Number(divisi.id_divisi));
+    const countText = `${teamsInDivisi.length} tim`;
+
+    const cards = teamsInDivisi.length > 0
+      ? teamsInDivisi.map((team) => `
+          <article class="verified-card">
+            <div class="verified-card-top">
+              <span class="badge primary">${escapeHtml(team.kode_registrasi)}</span>
+              <span class="badge TERKONFIRMASI">TERKONFIRMASI</span>
+            </div>
+            <h3>${escapeHtml(team.nama_tim)}</h3>
+            <p class="verified-title">${escapeHtml(team.judul)}</p>
+            <div class="verified-meta">
+              <div><span>Dosen</span><strong>${escapeHtml(team.nama_dosen)}</strong></div>
+              <div><span>Jumlah Anggota</span><strong>${escapeHtml(team.jumlah_anggota)}</strong></div>
+              <div><span>Tanggal Daftar</span><strong>${escapeHtml(team.tanggal_daftar)}</strong></div>
+              <div><span>Kategori</span><strong>${escapeHtml(divisi.jenis_perlombaan)}</strong></div>
+            </div>
+          </article>
+        `).join('')
+      : `
+        <div class="verified-empty-card">
+          Belum ada tim terverifikasi pada divisi ini.
+        </div>
+      `;
+
+    return `
+      <section class="verified-group">
+        <div class="verified-group-header">
+          <div>
+            <p class="verified-group-type">${escapeHtml(divisi.jenis_perlombaan)}</p>
+            <h2>${escapeHtml(divisi.nama_divisi)}</h2>
+          </div>
+          <span class="verified-count">${countText}</span>
+        </div>
+        <div class="verified-card-grid">
+          ${cards}
+        </div>
+      </section>
+    `;
+  }).join('');
+};
+
+const updateVerifiedStats = (divisiList, teams, selectedDivisiId = 'all') => {
+  const filteredTeams = selectedDivisiId === 'all'
+    ? teams
+    : teams.filter((team) => String(team.id_divisi) === String(selectedDivisiId));
+
+  const activeDivisiCount = selectedDivisiId === 'all'
+    ? divisiList.filter((divisi) => filteredTeams.some((team) => Number(team.id_divisi) === Number(divisi.id_divisi))).length
+    : (filteredTeams.length > 0 ? 1 : 0);
+
+  const totalAnggota = filteredTeams.reduce((sum, team) => sum + Number(team.jumlah_anggota || 0), 0);
+
+  document.getElementById('verifiedTotalTim').textContent = filteredTeams.length;
+  document.getElementById('verifiedTotalDivisi').textContent = activeDivisiCount;
+  document.getElementById('verifiedTotalAnggota').textContent = totalAnggota;
+};
+
+const renderRejectedGroups = (divisiList, teams, selectedDivisiId = 'all') => {
+  const container = document.getElementById('rejectedGroups');
+
+  const filteredDivisi = selectedDivisiId === 'all'
+    ? divisiList
+    : divisiList.filter((item) => String(item.id_divisi) === String(selectedDivisiId));
+
+  container.innerHTML = filteredDivisi.map((divisi) => {
+    const teamsInDivisi = teams.filter((team) => Number(team.id_divisi) === Number(divisi.id_divisi));
+    const countText = `${teamsInDivisi.length} tim`;
+
+    const cards = teamsInDivisi.length > 0
+      ? teamsInDivisi.map((team) => `
+          <article class="verified-card rejected-card">
+            <div class="verified-card-top">
+              <span class="badge primary">${escapeHtml(team.kode_registrasi)}</span>
+              <span class="badge DITOLAK">DITOLAK</span>
+            </div>
+            <h3>${escapeHtml(team.nama_tim)}</h3>
+            <p class="verified-title">${escapeHtml(team.judul)}</p>
+            <div class="verified-meta rejected-meta">
+              <div><span>Dosen</span><strong>${escapeHtml(team.nama_dosen)}</strong></div>
+              <div><span>Jumlah Anggota</span><strong>${escapeHtml(team.jumlah_anggota)}</strong></div>
+              <div><span>Tanggal Daftar</span><strong>${escapeHtml(team.tanggal_daftar)}</strong></div>
+              <div><span>Kategori</span><strong>${escapeHtml(divisi.jenis_perlombaan)}</strong></div>
+            </div>
+            <div class="rejected-comment-box">
+              <span>Komentar Penolakan</span>
+              <p>${escapeHtml(team.komentar_penolakan || 'Belum ada komentar penolakan.')}</p>
+            </div>
+          </article>
+        `).join('')
+      : `
+        <div class="verified-empty-card">
+          Belum ada tim ditolak pada divisi ini.
+        </div>
+      `;
+
+    return `
+      <section class="verified-group rejected-group">
+        <div class="verified-group-header">
+          <div>
+            <p class="verified-group-type">${escapeHtml(divisi.jenis_perlombaan)}</p>
+            <h2>${escapeHtml(divisi.nama_divisi)}</h2>
+          </div>
+          <span class="verified-count rejected-count">${countText}</span>
+        </div>
+        <div class="verified-card-grid">
+          ${cards}
+        </div>
+      </section>
+    `;
+  }).join('');
+};
+
+const updateRejectedStats = (divisiList, teams, selectedDivisiId = 'all') => {
+  const filteredTeams = selectedDivisiId === 'all'
+    ? teams
+    : teams.filter((team) => String(team.id_divisi) === String(selectedDivisiId));
+
+  const activeDivisiCount = selectedDivisiId === 'all'
+    ? divisiList.filter((divisi) => filteredTeams.some((team) => Number(team.id_divisi) === Number(divisi.id_divisi))).length
+    : (filteredTeams.length > 0 ? 1 : 0);
+
+  const totalKomentar = filteredTeams.filter((team) => String(team.komentar_penolakan || '').trim() !== '').length;
+
+  document.getElementById('rejectedTotalTim').textContent = filteredTeams.length;
+  document.getElementById('rejectedTotalDivisi').textContent = activeDivisiCount;
+  document.getElementById('rejectedTotalKomentar').textContent = totalKomentar;
+};
+
+const initVerifiedPage = async () => {
+  const filterSelect = document.getElementById('verifiedDivisiFilter');
+
+  try {
+    const [divisi, teams] = await Promise.all([
+      request('/divisi'),
+      request('/tim-terverifikasi')
+    ]);
+
+    latestDivisiData = divisi;
+    latestVerifiedTeams = teams;
+
+    fillSelect(filterSelect, divisi, 'id_divisi', 'nama_divisi', 'Semua divisi');
+    filterSelect.value = '';
+
+    updateVerifiedStats(divisi, teams, 'all');
+    renderVerifiedGroups(divisi, teams, 'all');
+  } catch (error) {
+    alert(error.message);
+  }
+
+  filterSelect.addEventListener('change', () => {
+    const selectedDivisiId = filterSelect.value || 'all';
+    updateVerifiedStats(latestDivisiData, latestVerifiedTeams, selectedDivisiId);
+    renderVerifiedGroups(latestDivisiData, latestVerifiedTeams, selectedDivisiId);
+  });
+};
+
+const initRejectedPage = async () => {
+  const filterSelect = document.getElementById('rejectedDivisiFilter');
+
+  try {
+    const [divisi, teams] = await Promise.all([
+      request('/divisi'),
+      request('/tim-ditolak')
+    ]);
+
+    latestDivisiData = divisi;
+    latestRejectedTeams = teams;
+
+    fillSelect(filterSelect, divisi, 'id_divisi', 'nama_divisi', 'Semua divisi');
+    filterSelect.value = '';
+
+    updateRejectedStats(divisi, teams, 'all');
+    renderRejectedGroups(divisi, teams, 'all');
+  } catch (error) {
+    alert(error.message);
+  }
+
+  filterSelect.addEventListener('change', () => {
+    const selectedDivisiId = filterSelect.value || 'all';
+    updateRejectedStats(latestDivisiData, latestRejectedTeams, selectedDivisiId);
+    renderRejectedGroups(latestDivisiData, latestRejectedTeams, selectedDivisiId);
+  });
 };
 
 const loadAdminData = async () => {
@@ -423,6 +629,9 @@ const showDetailTim = async (id) => {
   const detail = await request(`/admin/tim/${id}`);
   const panel = document.getElementById('detailPanel');
   const content = document.getElementById('detailContent');
+  const komentarPenolakan = detail.komentar_penolakan
+    ? `<div class="detail-item"><span>Komentar Penolakan</span><strong>${escapeHtml(detail.komentar_penolakan)}</strong></div>`
+    : '';
 
   content.innerHTML = `
     <div class="detail-list">
@@ -433,6 +642,7 @@ const showDetailTim = async (id) => {
       <div class="detail-item"><span>Dosen</span><strong>${escapeHtml(detail.nama_dosen)}</strong></div>
       <div class="detail-item"><span>Judul</span><strong>${escapeHtml(detail.judul)}</strong></div>
       <div class="detail-item"><span>Tanggal Daftar</span><strong>${escapeHtml(detail.tanggal_daftar)}</strong></div>
+      ${komentarPenolakan}
     </div>
     <div class="table-wrap">
       <table>
@@ -464,11 +674,24 @@ const showDetailTim = async (id) => {
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
+const openRejectModal = (id, existingComment = '') => {
+  document.getElementById('rejectTimId').value = id;
+  document.getElementById('rejectComment').value = existingComment;
+  document.getElementById('rejectModal').hidden = false;
+};
+
+const closeRejectModal = () => {
+  document.getElementById('rejectModal').hidden = true;
+};
+
 const initAdminPage = async () => {
   const timTableBody = document.getElementById('timTableBody');
   const closeDetailButton = document.getElementById('closeDetail');
   const detailPanel = document.getElementById('detailPanel');
   const exportSoloPdfButton = document.getElementById('exportSoloPdf');
+  const rejectModal = document.getElementById('rejectModal');
+  const closeRejectModalButton = document.getElementById('closeRejectModal');
+  const rejectForm = document.getElementById('rejectForm');
 
   try {
     await loadAdminData();
@@ -488,6 +711,17 @@ const initAdminPage = async () => {
         return;
       }
 
+      if (action === 'tolak') {
+        openRejectModal(id);
+        return;
+      }
+
+      if (action === 'komentar') {
+        const detail = await request(`/admin/tim/${id}`);
+        openRejectModal(id, detail.komentar_penolakan || '');
+        return;
+      }
+
       await request(`/admin/tim/${id}/${action}`, { method: 'PATCH' });
       await loadAdminData();
     } catch (error) {
@@ -500,6 +734,31 @@ const initAdminPage = async () => {
   });
 
   exportSoloPdfButton.addEventListener('click', exportSoloPdf);
+  closeRejectModalButton.addEventListener('click', closeRejectModal);
+
+  rejectModal.addEventListener('click', (event) => {
+    if (event.target === rejectModal) {
+      closeRejectModal();
+    }
+  });
+
+  rejectForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const id = document.getElementById('rejectTimId').value;
+    const komentar_penolakan = document.getElementById('rejectComment').value.trim();
+
+    try {
+      await request(`/admin/tim/${id}/tolak`, {
+        method: 'PATCH',
+        body: JSON.stringify({ komentar_penolakan })
+      });
+      closeRejectModal();
+      await loadAdminData();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -508,4 +767,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (page === 'solo') initSoloPage();
   if (page === 'tim') initTimPage();
   if (page === 'admin') initAdminPage();
+  if (page === 'verified') initVerifiedPage();
+  if (page === 'rejected') initRejectedPage();
 });

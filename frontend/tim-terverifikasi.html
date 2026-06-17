@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tim Terverifikasi - CiGITS GEMASTIK ITS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="verified">
+  <nav class="topbar page-topbar">
+    <a class="brand" href="index.html">CiGITS</a>
+    <div class="nav-links">
+      <a href="daftar-solo.html">Solo</a>
+      <a href="daftar-tim.html">Tim</a>
+      <a class="active" href="tim-terverifikasi.html">Terverifikasi</a>
+      <a href="tim-ditolak.html">Ditolak</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </nav>
+
+  <main class="container wide">
+    <header class="page-header verified-header">
+      <p class="eyebrow">Peserta</p>
+      <h1>Daftar Tim Terverifikasi</h1>
+      <p>Halaman ini menampilkan tim yang sudah lolos verifikasi admin dan dikelompokkan berdasarkan divisi GEMASTIK.</p>
+    </header>
+
+    <section class="stats-grid verified-stats">
+      <article class="stat-card">
+        <span>Total Tim Terverifikasi</span>
+        <strong id="verifiedTotalTim">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Total Divisi Aktif</span>
+        <strong id="verifiedTotalDivisi">0</strong>
+      </article>
+      <article class="stat-card">
+        <span>Total Anggota</span>
+        <strong id="verifiedTotalAnggota">0</strong>
+      </article>
+    </section>
+
+    <section class="table-section verified-filter-section">
+      <div class="section-title">
+        <h2>Filter Divisi</h2>
+      </div>
+      <div class="verified-filter-bar">
+        <label class="verified-filter-label" for="verifiedDivisiFilter">Pilih divisi</label>
+        <select id="verifiedDivisiFilter"></select>
+      </div>
+    </section>
+
+    <section class="verified-groups" id="verifiedGroups"></section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

@@ -43,6 +43,7 @@ const getTim = async (req, res, next) => {
         dosen.email AS email_dosen,
         t.judul,
         DATE_FORMAT(t.tanggal_daftar, '%Y-%m-%d') AS tanggal_daftar,
+        t.komentar_penolakan,
         t.status_pendaftaran AS status,
         fn_GetJumlahAnggota(t.id_tim) AS jumlah_anggota
       FROM tim t
@@ -78,6 +79,7 @@ const getDetailTim = async (req, res, next) => {
         dosen.email AS email_dosen,
         t.judul,
         DATE_FORMAT(t.tanggal_daftar, '%Y-%m-%d') AS tanggal_daftar,
+        t.komentar_penolakan,
         t.status_pendaftaran AS status
       FROM tim t
       JOIN divisi d ON d.id_divisi = t.id_divisi
@@ -194,7 +196,53 @@ const verifikasiTim = async (req, res, next) => {
   }
 };
 
-const tolakTim = (req, res, next) => updateStatusTim(req, res, next, 'DITOLAK');
+const tolakTim = async (req, res, next) => {
+  const { id } = req.params;
+  const { komentar_penolakan } = req.body;
+
+  if (!komentar_penolakan || String(komentar_penolakan).trim() === '') {
+    return res.status(400).json({
+      success: false,
+      message: 'Komentar penolakan wajib diisi'
+    });
+  }
+
+  try {
+    const [result] = await db.query(
+      `UPDATE tim
+       SET status_pendaftaran = 'DITOLAK',
+           komentar_penolakan = ?
+       WHERE id_tim = ?`,
+      [String(komentar_penolakan).trim(), Number(id)]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tim tidak ditemukan'
+      });
+    }
+
+    const [rows] = await db.query(
+      `SELECT
+        t.id_tim,
+        t.nama_tim,
+        t.status_pendaftaran AS status,
+        t.komentar_penolakan
+      FROM tim t
+      WHERE t.id_tim = ?`,
+      [Number(id)]
+    );
+
+    res.json({
+      success: true,
+      message: 'Status tim berhasil diubah menjadi DITOLAK',
+      data: rows[0]
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const getDashboardStats = async (req, res, next) => {
   try {
